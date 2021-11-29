@@ -23,15 +23,16 @@
             <q-input
               filled
               type="text"
-              v-model="login.username"
-              label="Username"
+              v-model="login.email"
+              label="Email"
               lazy-rules
               :rules="[
                 (val) =>
                   (val &&
                     val.length > 0 &&
-                    val.length < 13 &&
-                    /^[a-zA-Z0-9]+$/.test(val)) ||
+                    /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
+                      val
+                    )) ||
                   'Invalid format. Did you mistype?',
               ]"
             />
@@ -72,39 +73,61 @@
 
 <script>
 import { useQuasar } from "quasar";
-import { mapActions } from "vuex";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import db from "src/boot/firebase";
+import { collection, doc, getDoc, onSnapshot } from "firebase/firestore";
 
-let $q
+let $q;
 
 export default {
   name: "PageLogin",
   data() {
     return {
       login: {
-        username: "abc",
-        password: "123ABcdefg",
+        email: "stefansteff999@gmail.com",
+        password: "YcmB8jDA3wkkp5C",
       },
     };
   },
   methods: {
-    ...mapActions('auth', ['doLogin']),
     async onSubmit() {
       try {
-        await this.doLogin(this.login)
-      } catch (err) {
-        console.log(err)
-        if (err.response.data.detail) {
-          $q.notify({
-            color: "red-4",
-            textColor: "white",
-            message: err.response.data.detail,
+        const auth = getAuth();
+        signInWithEmailAndPassword(auth, this.login.email, this.login.password)
+          .then(async (userCredential) => {
+            const user = userCredential.user;
+            $q.notify({
+              color: "green-4",
+              textColor: "white",
+              message: "Logged in successfully!",
+            });
+            console.log(user);
+
+            const snap = await getDoc(doc(db, 'users', this.login.email))
+            const name = snap.data().username
+
+            user.displayName = name
+            await this.$store.dispatch("fetchUser", user)
+            this.$router.push("/");
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorMessage);
+            $q.notify({
+              color: "red-4",
+              textColor: "white",
+              message: "Please retype your credentials.",
+            });
           });
-        }
+
+      } catch (err) {
+        console.log(err);
       }
     },
   },
-  mounted () {
-    $q = useQuasar()
-  }
+  mounted() {
+    $q = useQuasar();
+  },
 };
 </script>

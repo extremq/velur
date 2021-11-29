@@ -28,4 +28,5 @@ export default {
   home: 'Home',
   profile: 'Profile',
   navigation: 'Navigation',
+  create: 'Create offer'
 }

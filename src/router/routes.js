@@ -17,11 +17,19 @@ const routes = [
         path: "/login",
         component: () => import("src/pages/PageLogin.vue"),
         name: "Login",
+        meta: { requiresNotAuth: true }
       },
       {
         path: "/register",
         component: () => import("src/pages/PageRegister.vue"),
         name: "Register",
+        meta: { requiresNotAuth: true }
+      },
+      {
+        path: "/create",
+        component: () => import("src/pages/PageCreate.vue"),
+        name: "Create offer",
+        meta: { requiresAuth: true }
       },
     ],
   },

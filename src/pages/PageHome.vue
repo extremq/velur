@@ -13,7 +13,13 @@
         q-gutter-md
       "
     >
-      <q-card flat bordered class="my-card">
+      <q-card
+        v-for="offer in offers"
+        :key="offer.id"
+        flat
+        bordered
+        class="my-card"
+      >
         <q-carousel
           animated
           v-model="slide"
@@ -23,24 +29,24 @@
           height="300px"
         >
           <q-carousel-slide
-            :name="1"
-            img-src="https://www.asket.com/imgproxy/e:1/format:jpeg/width:1080/resize:fit/quality:80/plain/https://asket.centracdn.net/client/dynamic/images/2_00d6bb1f5b-asket_tee_white_cart_thumb-original.jpg@jpg"
-          />
-          <q-carousel-slide
-            :name="2"
-            img-src="https://media.gq-magazine.co.uk/photos/5f575108020908336ccd4d82/master/w_1000,c_limit/20200907-tshirt-05.jpg"
+            v-for="i in offer.images.length"
+            :key="i"
+            :name="i"
+            :img-src="offer.images[i - 1]"
           />
         </q-carousel>
 
         <q-separator />
 
         <q-card-section>
-          <div class="col text-h5 ellipsis">White tee</div>
-          <div class="text-subtitle1 text-grey">added by Zed – 3 days ago</div>
+          <div class="col text-h5 ellipsis">{{ offer.title }}</div>
+          <div class="text-subtitle1 text-grey">
+            added by {{ offer.author }} – {{ new Date(Date.now()).toLocaleDateString() }}
+          </div>
           <div class="q-gutter-xs">
-            <q-badge outline color="secondary" label="M" />
-            <q-badge outline color="secondary" label="Bershka" />
-            <q-badge outline color="secondary" label="Cotton" />
+            <q-badge outline color="secondary" :label="offer.size" />
+            <q-badge outline color="secondary" :label="offer.manufacturer" />
+            <q-badge outline color="secondary" :label="offer.material" />
           </div>
         </q-card-section>
 
@@ -49,94 +55,7 @@
         <q-card-actions>
           <q-btn flat color="secondary">
             <q-icon class="q-pa-sm" name="payments" />
-            10 usd – Purchase
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-
-      <q-card flat bordered class="my-card">
-        <q-img
-          height="300px"
-          fit="cover"
-          src="https://content.moss.co.uk/images/extralarge/966663302_04.jpg"
-        />
-
-        <q-separator />
-
-        <q-card-section>
-          <div class="col text-h5 ellipsis">Blue shirt</div>
-          <div class="text-subtitle1 text-grey">added by Zed – 3 days ago</div>
-          <div class="q-gutter-xs">
-            <q-badge outline color="secondary" label="S" />
-            <q-badge outline color="secondary" label="Zara" />
-            <q-badge outline color="secondary" label="Cotton" />
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions>
-          <q-btn flat color="secondary">
-            <q-icon class="q-pa-sm" name="payments" />
-            13 usd – Purchase
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-
-      <q-card flat bordered class="my-card">
-        <q-img
-          height="300px"
-          fit="cover"
-          src="https://media.gq.com/photos/6070bc22f74872e19957f7bd/master/w_2000,h_1333,c_limit/Gramicci-NN-just-cut-pant.jpg"
-        />
-
-        <q-separator />
-
-        <q-card-section>
-          <div class="col text-h5 ellipsis">Jeans</div>
-          <div class="text-subtitle1 text-grey">added by Zed – 3 days ago</div>
-          <div class="q-gutter-xs">
-            <q-badge outline color="secondary" label="M" />
-            <q-badge outline color="secondary" label="Bershka" />
-            <q-badge outline color="secondary" label="Polymer" />
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions>
-          <q-btn flat color="secondary">
-            <q-icon class="q-pa-sm" name="payments" />
-            20 usd – Purchase
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-
-      <q-card flat bordered class="my-card">
-        <q-img
-          height="300px"
-          fit="cover"
-          src="https://s3.amazonaws.com/images.gearjunkie.com/uploads/2020/07/Western_Rise_Evolution.jpg"
-        />
-
-        <q-separator />
-
-        <q-card-section>
-          <div class="col text-h5 ellipsis">Navy jeans</div>
-          <div class="text-subtitle1 text-grey">added by Zed – 3 days ago</div>
-          <div class="q-gutter-xs">
-            <q-badge outline color="secondary" label="M" />
-            <q-badge outline color="secondary" label="Bershka" />
-            <q-badge outline color="secondary" label="Cotton" />
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions>
-          <q-btn flat color="secondary">
-            <q-icon class="q-pa-sm" name="payments" />
-            15 usd – Purchase
+            {{ offer.price }} usd – Purchase
           </q-btn>
         </q-card-actions>
       </q-card>
@@ -145,15 +64,66 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref } from "vue";
+
+import db from "src/boot/firebase";
+import { collection, query, getDocs, onSnapshot } from "firebase/firestore";
 
 export default {
+  name: "PageHome",
+  data() {
+    return {
+      offers: [
+        //   {
+        //   id: "asdasd",
+        //   title: "asd",
+        //   images: [
+        //     "https://media.gq-magazine.co.uk/photos/5f575108020908336ccd4d82/master/w_1000,c_limit/20200907-tshirt-05.jpg",
+        //     "https://media.gq.com/photos/5e839e814ce9d900093a32eb/master/w_2000,h_1333,c_limit/Kirkland-Signature-crew-neck-T-shirts-(6-pack).jpg",
+        //   ],
+        //   author: "zed",
+        //   manufacturer: "asd",
+        //   price: 2,
+        //   material: "asd",
+        //   size: "M",
+        //   date: 1
+        // }
+      ],
+    };
+  },
   setup() {
     return {
       slide: ref(1),
     };
   },
-  name: 'PageHome',
+  async mounted() {
+    const q = query(collection(db, "offers"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        let temp = change.doc.data();
+        temp.id = change.doc.id;
+        if (change.type === "added") {
+          this.addNewOffer(temp);
+        } else if (change.type === "removed") {
+          this.removeOffer(temp);
+        }
+      });
+      console.log("Current offers: ", this.offers.join(", "));
+    });
+  },
+  methods: {
+    addNewOffer(offer) {
+      console.log("New offer!");
+
+      this.offers.unshift(offer);
+    },
+    removeOffer(offer) {
+      console.log("Removed offer!");
+
+      let index = this.offers.findIndex((_offer) => _offer.id === offer.id);
+      this.offers.splice(index, 1);
+    },
+  },
 };
 </script>
 

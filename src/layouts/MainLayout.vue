@@ -6,7 +6,17 @@
 
         <q-toolbar-title> Velur </q-toolbar-title>
 
-        <q-btn label="Login" outline to="/login"/>
+        <!-- <q-btn label="test" @click="test" /> -->
+        <q-btn
+          v-if="user.loggedIn === false"
+          label="Login"
+          outline
+          to="/login"
+        />
+        <template v-else>
+          <div class="q-pa-xs">Hello, {{ user.data.displayName }}.</div>
+          <q-btn label="Logout" outline @click="logout" />
+        </template>
 
         <q-input
           dark
@@ -31,41 +41,63 @@
 
     <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered>
       <q-list>
-        
-        <q-item-label header>{{ $t('navigation') }}</q-item-label>
+        <q-item-label header>{{ $t("navigation") }}</q-item-label>
         <q-item clickable v-ripple to="/" exact>
           <q-item-section avatar>
             <q-avatar color="primary" text-color="white" icon="home" />
           </q-item-section>
 
           <q-item-section>
-            <q-item-label>{{ $t('home') }}</q-item-label>
+            <q-item-label>{{ $t("home") }}</q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-separator spaced/>
-        <q-item-label header>Account</q-item-label>
-        <q-item clickable v-ripple to="/profile" exact>
+        <q-item
+          v-if="user.loggedIn === true"
+          clickable
+          v-ripple
+          to="/create"
+          exact
+        >
           <q-item-section avatar>
-            <q-avatar color="primary" text-color="white" icon="person" />
+            <q-avatar color="primary" text-color="white" icon="add_circle" />
           </q-item-section>
 
           <q-item-section>
-            <q-item-label>Profile</q-item-label>
+            <q-item-label>{{ $t("create") }}</q-item-label>
           </q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple to="/orders" exact>
-          <q-item-section avatar>
-            <q-avatar color="primary" text-color="white" icon="local_shipping" />
-          </q-item-section>
+        <q-separator spaced />
 
-          <q-item-section>
-            <q-item-label>Orders</q-item-label>
-          </q-item-section>
-        </q-item>
+        <template v-if="user.loggedIn === true">
+          <q-item-label header>Account</q-item-label>
+          <q-item clickable v-ripple to="/profile" exact>
+            <q-item-section avatar>
+              <q-avatar color="primary" text-color="white" icon="person" />
+            </q-item-section>
 
-        <q-separator spaced/>
+            <q-item-section>
+              <q-item-label>Profile</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/orders" exact>
+            <q-item-section avatar>
+              <q-avatar
+                color="primary"
+                text-color="white"
+                icon="local_shipping"
+              />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>Orders</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-separator spaced />
+        </template>
         <q-item-label header>Others</q-item-label>
         <q-item clickable v-ripple to="/about" exact>
           <q-item-section avatar>
@@ -86,19 +118,54 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref } from "vue";
+import { mapGetters } from "vuex";
+
+import { useQuasar, Cookies } from "quasar";
+import { getAuth, signOut } from "firebase/auth";
+
+let $q;
 
 export default {
+  computed: {
+    ...mapGetters({
+      // map `this.user` to `this.$store.getters.user`
+      user: "user",
+    }),
+  },
   setup() {
     const leftDrawerOpen = ref(false);
-
     return {
-      text: ref(''),
+      text: ref(""),
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
     };
+  },
+  methods: {
+    test() {
+      console.log(this.user);
+    },
+    logout() {
+      const auth = getAuth();
+      signOut(auth)
+        .then(() => {
+          $q.notify({
+            color: "green-4",
+            textColor: "white",
+            message: "Logged out successfully!",
+          });
+          this.$router.push("/");
+          this.$store.dispatch("fetchUser", null);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+  },
+  mounted() {
+    $q = useQuasar();
   },
 };
 </script>

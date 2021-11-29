@@ -1,27 +1,31 @@
-import { store } from 'quasar/wrappers'
-import { createStore } from 'vuex'
+import { store } from "quasar/wrappers";
+import { createStore } from "vuex";
+import createPersistedState from "vuex-persistedstate";
+import { Cookies } from "quasar";
 
-import auth from './auth'
-
-/*
- * If not building with SSR mode, you can
- * directly export the Store instantiation;
- *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
- * with the Store instance.
- */
+import auth from "./auth";
 
 export default store(function (/* { ssrContext } */) {
   const Store = createStore({
     modules: {
-      auth
+      auth: auth,
     },
-
+    plugins: [
+      createPersistedState({
+        storage: {
+          getItem: (key) => {
+            return Cookies.get(key)
+          },
+          setItem: (key, value) =>
+            Cookies.set(key, value, { expires: 3, secure: false }),
+          removeItem: (key) => Cookies.remove(key),
+        },
+      }),
+    ],
     // enable strict mode (adds overhead!)
     // for dev mode and --debug builds only
-    strict: process.env.DEBUGGING
-  })
+    strict: process.env.DEBUGGING,
+  });
 
-  return Store
-})
+  return Store;
+});
