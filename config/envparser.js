@@ -1,13 +1,18 @@
 // config/envparser.js
 const DotEnv = require('dotenv')
-const parsedEnv = DotEnv.config().parsed
+const result = DotEnv.config()
+const _ = require('lodash');
 
-module.exports = function () {
-  // Let's stringify our variables
-  for (key in parsedEnv) {
-    if (typeof parsedEnv[key] === 'string') {
-      parsedEnv[key] = JSON.stringify(parsedEnv[key])
-    }
-  }
-  return parsedEnv
+let parsedEnv
+
+if (!('error') in result) {
+    parsedEnv = result.parsed
+} else {
+    parsedEnv = {}
+    _.each(process.env, (value, key) => parsedEnv[key] = value);
 }
+
+module.exports = function() {
+    return parsedEnv
+} 
+    
