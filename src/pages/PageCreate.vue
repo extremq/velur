@@ -145,6 +145,7 @@ export default {
           "https://media.gq-magazine.co.uk/photos/5f575108020908336ccd4d82/master/w_1000,c_limit/20200907-tshirt-05.jpg",
         ],
         author: this.$store.getters.user.data.displayName,
+        author_id: this.$store.getters.user.data.uid,
         manufacturer: "",
         price: 0,
         material: "",

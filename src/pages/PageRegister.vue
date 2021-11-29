@@ -124,7 +124,8 @@ export default {
             
             let newUser = {
               username: this.register.username,
-              offers: []
+              offers: [],
+              uid: user.uid
             }
             await setDoc(doc(db, "users", this.register.email), newUser);
 

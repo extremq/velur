@@ -105,8 +105,10 @@ export default {
 
             const snap = await getDoc(doc(db, 'users', this.login.email))
             const name = snap.data().username
+            const uid = snap.data().uid
 
             user.displayName = name
+            user.uid = uid
             await this.$store.dispatch("fetchUser", user)
             this.$router.push("/");
           })
