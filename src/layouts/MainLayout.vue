@@ -37,14 +37,15 @@
         <q-item>
           <q-item-section>
             <q-btn
+              color="primary"
               v-if="user.loggedIn === false"
               label="Login"
               outline
               to="/login"
             />
             <q-btn
+              color="primary"
               v-else
-              class="gt-sm"
               label="Logout"
               outline
               @click="logout"
