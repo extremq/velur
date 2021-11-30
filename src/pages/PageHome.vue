@@ -20,28 +20,15 @@
         bordered
         class="my-card"
       >
-        <q-carousel
-          animated
-          v-model="slide"
-          arrows
-          navigation
-          infinite
-          height="300px"
-        >
-          <q-carousel-slide
-            v-for="i in offer.images.length"
-            :key="i"
-            :name="i"
-            :img-src="offer.images[i - 1]"
-          />
-        </q-carousel>
+        <q-img lazy fit="contain" height="300px" :src="offer.images[0]">
+        </q-img>
 
         <q-separator />
 
         <q-card-section>
           <div class="col text-h5 ellipsis">{{ offer.title }}</div>
           <div class="text-subtitle1 text-grey">
-            added by {{ offer.author }} – {{ new Date(Date.now()).toLocaleDateString() }}
+            added by {{ offer.author }} – {{ new Date(offer.date.seconds * 1000).toLocaleDateString() }}
           </div>
           <div class="q-gutter-xs">
             <q-badge outline color="secondary" :label="offer.size" />
@@ -67,7 +54,7 @@
 import { ref } from "vue";
 
 import db from "src/boot/firebase";
-import { collection, query, getDocs, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, limit, orderBy } from "firebase/firestore";
 
 export default {
   name: "PageHome",
@@ -97,7 +84,7 @@ export default {
     };
   },
   async mounted() {
-    const q = query(collection(db, "offers"));
+    const q = query(collection(db, "offers"), orderBy("date"), limit(50));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         let temp = change.doc.data();

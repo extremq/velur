@@ -7,15 +7,8 @@
         <q-toolbar-title> Velur </q-toolbar-title>
 
         <!-- <q-btn label="test" @click="test" /> -->
-        <q-btn
-          v-if="user.loggedIn === false"
-          label="Login"
-          outline
-          to="/login"
-        />
-        <template v-else>
-          <div class="q-pa-xs">Hello, {{ user.data.displayName }}.</div>
-          <q-btn label="Logout" outline @click="logout" />
+        <template v-if="user.loggedIn === true">
+          <div class="q-pa-xs gt-sm">Hello, {{ user.data.displayName }}.</div>
         </template>
 
         <q-input
@@ -41,6 +34,23 @@
 
     <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered>
       <q-list>
+        <q-item>
+          <q-item-section>
+            <q-btn
+              v-if="user.loggedIn === false"
+              label="Login"
+              outline
+              to="/login"
+            />
+            <q-btn
+              v-else
+              class="gt-sm"
+              label="Logout"
+              outline
+              @click="logout"
+            />
+          </q-item-section>
+        </q-item>
         <q-item-label header>{{ $t("navigation") }}</q-item-label>
         <q-item clickable v-ripple to="/" exact>
           <q-item-section avatar>

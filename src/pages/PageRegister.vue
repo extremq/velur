@@ -129,7 +129,7 @@ export default {
             }
             await setDoc(doc(db, "users", this.register.email), newUser);
 
-            this.$router.push("/");
+            this.$router.push("/login");
 
             $q.notify({
               color: "green-4",

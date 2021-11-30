@@ -84,8 +84,8 @@ export default {
   data() {
     return {
       login: {
-        email: "stefansteff999@gmail.com",
-        password: "YcmB8jDA3wkkp5C",
+        email: "",
+        password: "",
       },
     };
   },
