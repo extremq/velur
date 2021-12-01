@@ -8,7 +8,7 @@
 
         <!-- <q-btn label="test" @click="test" /> -->
         <template v-if="user.loggedIn === true">
-          <div class="q-pa-xs gt-sm">Hello, {{ user.data.displayName }}.</div>
+          <div class="q-pa-xs gt-sm">Hello, {{ user.data.displayName || user.data.email }}.</div>
         </template>
 
         <q-input

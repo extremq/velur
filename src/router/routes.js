@@ -31,6 +31,11 @@ const routes = [
         name: "Create offer",
         meta: { requiresAuth: true }
       },
+      {
+        path: "/offer/:id",
+        component: () => import("src/pages/PageOffer.vue"),
+        name: "Offer"
+      }
     ],
   },
 

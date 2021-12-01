@@ -40,7 +40,7 @@
         <q-separator />
 
         <q-card-actions>
-          <q-btn flat color="secondary">
+          <q-btn flat color="secondary" @click="openOffer(offer.id)">
             <q-icon class="q-pa-sm" name="payments" />
             {{ offer.price }} usd – Purchase
           </q-btn>
@@ -95,21 +95,19 @@ export default {
           this.removeOffer(temp);
         }
       });
-      console.log("Current offers: ", this.offers.join(", "));
     });
   },
   methods: {
     addNewOffer(offer) {
-      console.log("New offer!");
-
       this.offers.unshift(offer);
     },
     removeOffer(offer) {
-      console.log("Removed offer!");
-
       let index = this.offers.findIndex((_offer) => _offer.id === offer.id);
       this.offers.splice(index, 1);
     },
+    openOffer(offerId) {
+      this.$router.push("/offer/" + offerId);
+    }
   },
 };
 </script>

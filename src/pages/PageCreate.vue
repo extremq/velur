@@ -60,9 +60,7 @@
               accept=".jpg, image/*"
               @rejected="onRejected"
               lazy-rules
-              :rules="[
-                (val) => (val && val.length > 0)
-              ]"
+              :rules="[(val) => val && val.length > 0]"
             >
               <template v-slot:prepend>
                 <q-icon name="attach_file" />
@@ -124,14 +122,28 @@
 
 <script>
 import { useQuasar } from "quasar";
+import { mapGetters } from "vuex";
 
 import db from "src/boot/firebase";
-import { doc, addDoc, Timestamp, collection } from "firebase/firestore";
+import {
+  setDoc,
+  doc,
+  addDoc,
+  Timestamp,
+  collection,
+  getDoc,
+} from "firebase/firestore";
 
 let $q;
 
 export default {
   name: "PageCreate",
+  computed: {
+    ...mapGetters({
+      // map `this.user` to `this.$store.getters.user`
+      user: "user",
+    }),
+  },
   data() {
     return {
       files: [],
@@ -151,6 +163,8 @@ export default {
         material: "",
         size: "M",
         date: null,
+        contact: null,
+        join: null,
       },
     };
   },
@@ -159,15 +173,28 @@ export default {
       try {
         let newOffer = this.offer;
         newOffer.date = Timestamp.now();
-        console.log(newOffer);
-        await addDoc(collection(db, "offers"), newOffer);
+        newOffer.contact = this.user.data.email;
+
+        const docRef = doc(db, "users", this.user.data.email);
+        
+        const docSnap = await getDoc(docRef);
+
+        let newUser = docSnap.data();
+
+        newOffer.join = newUser.creation_date;
+        const addedRef = await addDoc(collection(db, "offers"), newOffer);
+
+        newUser.offers.push(addedRef.id);
+        
+        setDoc(docRef, newUser, { merge: true });
+        
+
 
         $q.notify({
           color: "green-4",
           textColor: "white",
           message: "Submitted!",
         });
-        console.log(this.offer);
         this.$router.push("/");
       } catch (err) {
         console.log(err);

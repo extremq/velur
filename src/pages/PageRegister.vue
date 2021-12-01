@@ -91,10 +91,22 @@
 
 <script>
 import { useQuasar } from "quasar";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  deleteUser,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 import db from "src/boot/firebase";
-import { doc, setDoc, Timestamp, collection } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  Timestamp,
+  collection,
+  getDoc,
+  addDoc,
+} from "firebase/firestore";
 
 let $q;
 
@@ -103,8 +115,8 @@ export default {
   data() {
     return {
       register: {
-        email: "",
         username: "",
+        email: "",
         password: "",
       },
     };
@@ -118,23 +130,39 @@ export default {
           this.register.email,
           this.register.password
         )
-          .then(async (userCredential) => {
-            const user = userCredential.user;
-            console.log("Account created succesfully!");
-            
-            let newUser = {
-              username: this.register.username,
-              offers: [],
-              uid: user.uid
-            }
-            await setDoc(doc(db, "users", this.register.email), newUser);
+          .then(() => {
+            signInWithEmailAndPassword(
+              auth,
+              this.register.email,
+              this.register.password
+            ).then(async (userCredential) => {
+              const user = userCredential.user;
+              console.log(user);
+              setDoc(doc(db, "usernames", this.register.username), {
+                name: this.register.username,
+              });
 
-            this.$router.push("/login");
+              try {
+                let newUser = {
+                  username: this.register.username,
+                  offers: [],
+                  uid: user.uid,
+                  creation_date: Timestamp.now()
+                };
+                await setDoc(doc(db, "users", this.register.email), newUser);
+              } catch (e) {
+                console.log(e);
+              }
 
-            $q.notify({
-              color: "green-4",
-              textColor: "white",
-              message: "Account created!",
+              this.$router.push("/");
+              user.displayName = this.register.username;
+              await this.$store.dispatch("fetchUser", user);
+
+              $q.notify({
+                color: "green-4",
+                textColor: "white",
+                message: "Account created!",
+              });
             });
           })
           .catch((error) => {

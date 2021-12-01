@@ -75,7 +75,13 @@
 import { useQuasar } from "quasar";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import db from "src/boot/firebase";
-import { collection, doc, getDoc, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  setDoc,
+  doc,
+  getDoc,
+  onSnapshot,
+} from "firebase/firestore";
 
 let $q;
 
@@ -95,21 +101,21 @@ export default {
         const auth = getAuth();
         signInWithEmailAndPassword(auth, this.login.email, this.login.password)
           .then(async (userCredential) => {
-            const user = userCredential.user;
+            let user = userCredential.user;
             $q.notify({
               color: "green-4",
               textColor: "white",
               message: "Logged in successfully!",
             });
-            console.log(user);
+            console.log(this.fetchUser);
 
-            const snap = await getDoc(doc(db, 'users', this.login.email))
-            const name = snap.data().username
-            const uid = snap.data().uid
+            const snap = await getDoc(doc(db, "users", this.login.email));
 
-            user.displayName = name
-            user.uid = uid
-            await this.$store.dispatch("fetchUser", user)
+            let name, uid;
+            name = snap.data().username;
+
+            user.displayName = name;
+            await this.$store.dispatch("fetchUser", user);
             this.$router.push("/");
           })
           .catch((error) => {
@@ -122,11 +128,10 @@ export default {
               message: "Please retype your credentials.",
             });
           });
-
       } catch (err) {
         console.log(err);
       }
-    },
+    }
   },
   mounted() {
     $q = useQuasar();
