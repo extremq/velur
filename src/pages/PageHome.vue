@@ -28,12 +28,19 @@
         <q-card-section>
           <div class="col text-h5 ellipsis">{{ offer.title }}</div>
           <div class="text-subtitle1 text-grey">
-            added by {{ offer.author }} – {{ new Date(offer.date.seconds * 1000).toLocaleDateString() }}
+            added by {{ offer.author }} –
+            {{ new Date(offer.date.seconds * 1000).toLocaleDateString() }}
           </div>
           <div class="q-gutter-xs">
-            <q-badge outline color="secondary" :label="offer.size" />
-            <q-badge outline color="secondary" :label="offer.manufacturer" />
-            <q-badge outline color="secondary" :label="offer.material" />
+            <q-badge outline color="secondary" :label="offer.size">
+              <q-tooltip> Size </q-tooltip>
+            </q-badge>
+            <q-badge outline color="secondary" :label="offer.manufacturer">
+              <q-tooltip> Manufacturer </q-tooltip>
+            </q-badge>
+            <q-badge outline color="secondary" :label="offer.material">
+              <q-tooltip> Material </q-tooltip>
+            </q-badge>
           </div>
         </q-card-section>
 
@@ -42,7 +49,7 @@
         <q-card-actions>
           <q-btn flat color="secondary" @click="openOffer(offer.id)">
             <q-icon class="q-pa-sm" name="payments" />
-            {{ offer.price }} usd – Purchase
+            {{ offer.price }} usd – Check out
           </q-btn>
         </q-card-actions>
       </q-card>
@@ -54,7 +61,13 @@
 import { ref } from "vue";
 
 import db from "src/boot/firebase";
-import { collection, query, onSnapshot, limit, orderBy } from "firebase/firestore";
+import {
+  collection,
+  query,
+  onSnapshot,
+  limit,
+  orderBy,
+} from "firebase/firestore";
 
 export default {
   name: "PageHome",
@@ -107,7 +120,7 @@ export default {
     },
     openOffer(offerId) {
       this.$router.push("/offer/" + offerId);
-    }
+    },
   },
 };
 </script>

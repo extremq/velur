@@ -102,6 +102,7 @@ export default {
         signInWithEmailAndPassword(auth, this.login.email, this.login.password)
           .then(async (userCredential) => {
             let user = userCredential.user;
+            console.log(user)
             $q.notify({
               color: "green-4",
               textColor: "white",
@@ -111,7 +112,7 @@ export default {
 
             const snap = await getDoc(doc(db, "users", this.login.email));
 
-            let name, uid;
+            let name;
             name = snap.data().username;
 
             user.displayName = name;

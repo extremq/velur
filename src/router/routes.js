@@ -35,6 +35,11 @@ const routes = [
         path: "/offer/:id",
         component: () => import("src/pages/PageOffer.vue"),
         name: "Offer"
+      },
+      {
+        path: "/profile/:username",
+        component: () => import("src/pages/PageProfile.vue"),
+        name: "Profile"
       }
     ],
   },

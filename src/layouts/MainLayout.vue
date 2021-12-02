@@ -83,7 +83,7 @@
 
         <template v-if="user.loggedIn === true">
           <q-item-label header>Account</q-item-label>
-          <q-item clickable v-ripple to="/profile" exact>
+          <q-item clickable v-ripple :to="'/profile/' + user.data.displayName" exact>
             <q-item-section avatar>
               <q-avatar color="primary" text-color="white" icon="person" />
             </q-item-section>

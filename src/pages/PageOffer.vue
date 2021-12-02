@@ -15,7 +15,10 @@
     >
       <q-card flat bordered style="width: 700px">
         <q-card-section>
-          <div class="col text-h4 text-center">{{ offer.title }}</div>
+          <div class="col text-h4 text-center ellipsis">
+            {{ offer.title }}
+            <q-tooltip> {{ offer.title }} </q-tooltip>
+          </div>
         </q-card-section>
         <q-img
           v-if="offer.images.length === 1"
@@ -256,7 +259,7 @@ export default {
         textColor: "white",
         message: "Offer deleted.",
       });
-      this.$router.push("/");
+      this.$router.push(this.$route.query.redirect || '/');
     },
     confirm() {
       $q.dialog({
@@ -265,9 +268,6 @@ export default {
         cancel: true,
         persistent: true,
       })
-        .onOk(() => {
-          this.deleteOffer();
-        })
         .onOk(() => {
           this.deleteOffer();
         })

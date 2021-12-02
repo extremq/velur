@@ -47,7 +47,47 @@
               ]"
             />
 
-            <q-file
+            <q-input
+              filled
+              type="text"
+              v-model="offer.images[0]"
+              label="Image link 1"
+              hint="Paste the link of an image of your article."
+              lazy-rules
+              :rules="[
+                (val) =>
+                  (val && val.length > 0 && val.length < 100) ||
+                  'You must have at least one image.',
+              ]"
+            />
+
+            <q-input
+              filled
+              type="text"
+              v-model="offer.images[1]"
+              label="Image link 2"
+              lazy-rules
+              :rules="[
+                (val) =>
+                  (val && val.length > 0 && val.length < 100) || !(val) ||
+                  'Link is too long. Use imgur.',
+              ]"
+            />
+
+            <q-input
+              filled
+              type="text"
+              v-model="offer.images[2]"
+              label="Image link 3"
+              lazy-rules
+              :rules="[
+                (val) =>
+                  (val && val.length > 0 && val.length < 100) || !(val) ||
+                  'Link is too long. Use imgur.',
+              ]"
+            />
+
+            <!-- <q-file
               v-model="files"
               label="Pick images"
               hint="Only upload images that are less than 10 megabytes in size."
@@ -73,7 +113,7 @@
                   class="cursor-pointer"
                 />
               </template>
-            </q-file>
+            </q-file> -->
 
             <q-input
               filled
@@ -154,7 +194,7 @@ export default {
       offer: {
         title: "",
         images: [
-          "https://media.gq-magazine.co.uk/photos/5f575108020908336ccd4d82/master/w_1000,c_limit/20200907-tshirt-05.jpg",
+          "", "", ""
         ],
         author: this.$store.getters.user.data.displayName,
         author_id: this.$store.getters.user.data.uid,
@@ -174,6 +214,17 @@ export default {
         let newOffer = this.offer;
         newOffer.date = Timestamp.now();
         newOffer.contact = this.user.data.email;
+
+        if (this.offer.images[1] == '') {
+          this.offer.images.splice(1, 1);
+          // check if second image is also null
+          if (this.offer.images[1] == '') {
+            this.offer.images.splice(1, 1);
+          }
+        }
+        else if (this.offer.images[2] == '') {
+          this.offer.images.splice(2, 1);
+        }
 
         const docRef = doc(db, "users", this.user.data.email);
         
@@ -195,7 +246,7 @@ export default {
           textColor: "white",
           message: "Submitted!",
         });
-        this.$router.push("/");
+        this.$router.push("/offer/" + addedRef.id);
       } catch (err) {
         console.log(err);
       }

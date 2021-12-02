@@ -137,32 +137,45 @@ export default {
               this.register.password
             ).then(async (userCredential) => {
               const user = userCredential.user;
-              console.log(user);
+
               setDoc(doc(db, "usernames", this.register.username), {
                 name: this.register.username,
-              });
+              })
+                .then(async () => {
+                  try {
+                    let newUser = {
+                      username: this.register.username,
+                      offers: [],
+                      uid: user.uid,
+                      creation_date: Timestamp.now(),
+                    };
+                    await setDoc(
+                      doc(db, "users", this.register.email),
+                      newUser
+                    );
+                  } catch (e) {
+                    console.log(e);
+                  }
 
-              try {
-                let newUser = {
-                  username: this.register.username,
-                  offers: [],
-                  uid: user.uid,
-                  creation_date: Timestamp.now()
-                };
-                await setDoc(doc(db, "users", this.register.email), newUser);
-              } catch (e) {
-                console.log(e);
-              }
+                  this.$router.push("/");
+                  user.displayName = this.register.username;
+                  await this.$store.dispatch("fetchUser", user);
 
-              this.$router.push("/");
-              user.displayName = this.register.username;
-              await this.$store.dispatch("fetchUser", user);
-
-              $q.notify({
-                color: "green-4",
-                textColor: "white",
-                message: "Account created!",
-              });
+                  $q.notify({
+                    color: "green-4",
+                    textColor: "white",
+                    message: "Account created!",
+                  });
+                })
+                .catch((error) => {
+                  deleteUser(user)
+                  console.log(error);
+                  $q.notify({
+                    color: "red-4",
+                    textColor: "white",
+                    message: "Username taken.",
+                  });
+                });
             });
           })
           .catch((error) => {
