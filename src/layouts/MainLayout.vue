@@ -4,11 +4,17 @@
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
 
-        <q-toolbar-title> Velur </q-toolbar-title>
+        <q-toolbar-title
+          @click="this.$router.push('/')"
+          style="cursor: pointer"
+        >
+          Velur
+        </q-toolbar-title>
 
-        <!-- <q-btn label="test" @click="test" /> -->
         <template v-if="user.loggedIn === true">
-          <div class="q-pa-xs gt-sm">Hello, {{ user.data.displayName || user.data.email }}.</div>
+          <div class="q-pa-xs gt-sm">
+            Hello, {{ user.data.displayName || user.data.email }}.
+          </div>
         </template>
 
         <q-input
@@ -83,7 +89,12 @@
 
         <template v-if="user.loggedIn === true">
           <q-item-label header>Account</q-item-label>
-          <q-item clickable v-ripple :to="'/profile/' + user.data.displayName" exact>
+          <q-item
+            clickable
+            v-ripple
+            :to="'/profile/' + user.data.displayName"
+            exact
+          >
             <q-item-section avatar>
               <q-avatar color="primary" text-color="white" icon="person" />
             </q-item-section>
@@ -162,16 +173,19 @@ export default {
       const auth = getAuth();
       signOut(auth)
         .then(() => {
+          // Throw toast informing action was succesful
           $q.notify({
             color: "green-4",
             textColor: "white",
             message: "Logged out successfully!",
           });
+
+          // Redirect and delete the store.
           this.$router.push("/");
           this.$store.dispatch("fetchUser", null);
         })
         .catch((error) => {
-          console.log(error);
+          console.error(error);
         });
     },
   },

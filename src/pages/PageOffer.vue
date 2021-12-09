@@ -144,7 +144,7 @@
 
         <q-separator />
         <q-card-section>
-          <q-item>
+          <q-item v-if="user.data && user.data.email !== offer.contact">
             <q-item-section>
               <q-btn color="primary" label="Purchase" outline />
             </q-item-section>
@@ -157,9 +157,31 @@
               />
             </q-item-section>
           </q-item>
+          <q-item v-else>
+            <q-item-section>
+              <q-btn
+                color="primary"
+                :label="
+                  user.data && user.data.email === offer.contact
+                    ? 'You own the offer'
+                    : 'Login to purchase'
+                "
+                disable
+                outline
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-btn
+                color="primary"
+                label="Contact seller"
+                outline
+                @click="alert"
+              />
+            </q-item-section>
+          </q-item>
         </q-card-section>
 
-        <template v-if="user.data.email === offer.contact">
+        <template v-if="user.data && user.data.email === offer.contact">
           <q-separator />
           <q-card-section>
             <q-item-label header> Offer actions </q-item-label>
@@ -200,6 +222,7 @@ export default {
   data() {
     return {
       slide: ref(1),
+      // "Empty" offer template.
       offer: {
         author: null,
         author_id: null,
@@ -219,11 +242,15 @@ export default {
   },
   methods: {
     async getOffer() {
+      // Using the id in the route, I request
+      // the offer that has the same id.
       const id = this.$route.params.id;
       const docRef = doc(db, "offers", id);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
+        // If there is one, I translate the timestamps
+        // into readable dates.
         this.offer = docSnap.data();
         this.offer.timestamp = new Date(
           this.offer.date.seconds * 1000
@@ -232,6 +259,9 @@ export default {
           this.offer.join.seconds * 1000
         ).toLocaleString();
       } else {
+        // Throw toast informing the user that
+        // the offer does not exist and redirect
+        // them to the home page.
         $q.notify({
           color: "red-4",
           textColor: "white",
@@ -241,27 +271,47 @@ export default {
       }
     },
     async deleteOffer() {
+      // If you are the owner of the offer,
+      // a button will show up for deleting the offer.
       const id = this.$route.params.id;
-      await deleteDoc(doc(db, "offers", id));
+      await deleteDoc(doc(db, "offers", id))
+        .then(async () => {
+          // Firebase allowed and author_id matched
+          const docRef = doc(db, "users", this.user.data.email);
 
-      const docRef = doc(db, "users", this.user.data.email);
+          const docSnap = await getDoc(docRef);
+          let newUser = docSnap.data();
 
-      const docSnap = await getDoc(docRef);
-      let newUser = docSnap.data();
+          // I retrieve the user data and remove
+          // the offer id.
+          let index = newUser.offers.findIndex((_id) => _id === id);
+          newUser.offers.splice(index, 1);
 
-      let index = newUser.offers.findIndex((_id) => _id === id);
-      newUser.offers.splice(index, 1);
+          // Update the user doc.
+          await setDoc(docRef, newUser, { merge: true });
 
-      await setDoc(docRef, newUser, { merge: true });
+          // Throw a toast informing that the
+          // action went successfully.
+          $q.notify({
+            color: "green-4",
+            textColor: "white",
+            message: "Offer deleted.",
+          });
 
-      $q.notify({
-        color: "green-4",
-        textColor: "white",
-        message: "Offer deleted.",
-      });
-      this.$router.push(this.$route.query.redirect || '/');
+          // Redirect the user if that's the case.
+          this.$router.push(this.$route.query.redirect || "/");
+        })
+        .catch(() => {
+          // Firebase rejects the query.
+          $q.notify({
+            color: "red-4",
+            textColor: "white",
+            message: "Cannot delete offer.",
+          });
+        });
     },
     confirm() {
+      // Dialog for deleting the offer.
       $q.dialog({
         title: "Confirm deletion",
         message: "Are you sure you want to delete this offer?",
@@ -276,6 +326,7 @@ export default {
         });
     },
     alert() {
+      // Dialog for contact details.
       $q.dialog({
         title: "Contact details",
         message: "Send an email here: " + this.offer.contact,
@@ -284,6 +335,8 @@ export default {
   },
   mounted() {
     $q = useQuasar();
+
+    // Init and get the offer.
     this.getOffer();
   },
 };

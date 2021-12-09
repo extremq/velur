@@ -74,20 +74,6 @@ export default {
   data() {
     return {
       offers: [
-        //   {
-        //   id: "asdasd",
-        //   title: "asd",
-        //   images: [
-        //     "https://media.gq-magazine.co.uk/photos/5f575108020908336ccd4d82/master/w_1000,c_limit/20200907-tshirt-05.jpg",
-        //     "https://media.gq.com/photos/5e839e814ce9d900093a32eb/master/w_2000,h_1333,c_limit/Kirkland-Signature-crew-neck-T-shirts-(6-pack).jpg",
-        //   ],
-        //   author: "zed",
-        //   manufacturer: "asd",
-        //   price: 2,
-        //   material: "asd",
-        //   size: "M",
-        //   date: 1
-        // }
       ],
     };
   },
@@ -97,11 +83,18 @@ export default {
     };
   },
   async mounted() {
+    // Retrieve offers by date.
     const q = query(collection(db, "offers"), orderBy("date"), limit(50));
+
+    // Set up a listener to add and delete all offers.
     const unsubscribe = onSnapshot(q, (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         let temp = change.doc.data();
+        // Append its id so we can use it to generate links.
+        // I also use it for deleting.
         temp.id = change.doc.id;
+
+        // Only add or remove, I don't want edits.
         if (change.type === "added") {
           this.addNewOffer(temp);
         } else if (change.type === "removed") {
@@ -115,6 +108,7 @@ export default {
       this.offers.unshift(offer);
     },
     removeOffer(offer) {
+      // Remove the offer with the same id as the requested offer.
       let index = this.offers.findIndex((_offer) => _offer.id === offer.id);
       this.offers.splice(index, 1);
     },

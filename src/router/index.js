@@ -37,7 +37,7 @@ export default route(function ({ store, ssrContext }) {
 
   Router.beforeEach((to, from, next) => {
     if (to.matched.some((route) => route.meta.requiresAuth)) {
-      // Yes this route requires authentication. See if the user is authenticated.
+      // YThis route requires authentication. See if the user is authenticated.
       if (store.getters.isAuthenticated === true) {
         // User is authenticated, we allow access.
         next();
@@ -45,7 +45,7 @@ export default route(function ({ store, ssrContext }) {
         next("/login");
       }
     } else if (to.matched.some((route) => route.meta.requiresNotAuth)) {
-      // Yes this route requires not to be authenticated.
+      // This route requires not to be authenticated.
       if (store.getters.isAuthenticated === false) {
         // User is not authenticated, we allow access.
         next();

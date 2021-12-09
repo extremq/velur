@@ -99,28 +99,36 @@ export default {
     async onSubmit() {
       try {
         const auth = getAuth();
+        // Login with the credentials.
         signInWithEmailAndPassword(auth, this.login.email, this.login.password)
           .then(async (userCredential) => {
             let user = userCredential.user;
-            console.log(user)
+
+            //console.dir(user)
+
+            // Throw a toast informing the user they logged in succesfully.
             $q.notify({
               color: "green-4",
               textColor: "white",
               message: "Logged in successfully!",
             });
-            console.log(this.fetchUser);
 
+            // console.dir(this.fetchUser);
+
+            // Retrieve the user in order to update the state of the auth store.
             const snap = await getDoc(doc(db, "users", this.login.email));
 
             let name;
             name = snap.data().username;
-
             user.displayName = name;
+
+            // Send a dispatch to update all the components.
             await this.$store.dispatch("fetchUser", user);
             this.$router.push("/");
           })
           .catch((error) => {
-            const errorCode = error.code;
+            // Throw a toast informing the user that they mistyped their
+            // login info.
             const errorMessage = error.message;
             console.log(errorMessage);
             $q.notify({
@@ -130,7 +138,8 @@ export default {
             });
           });
       } catch (err) {
-        console.log(err);
+        // Firebase error.
+        console.error("Firebase error!" + err);
       }
     }
   },

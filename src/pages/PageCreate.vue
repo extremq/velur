@@ -191,6 +191,7 @@ export default {
         return `${filesNumber} files of ${maxFiles} | ${totalSize}`;
       },
       sizings: ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
+      // Default offer template
       offer: {
         title: "",
         images: [
@@ -211,6 +212,7 @@ export default {
   methods: {
     async onSubmit() {
       try {
+        // Create a new offer.
         let newOffer = this.offer;
         newOffer.date = Timestamp.now();
         newOffer.contact = this.user.data.email;
@@ -226,31 +228,31 @@ export default {
           this.offer.images.splice(2, 1);
         }
 
+        // Get the user object of the logged in user.
         const docRef = doc(db, "users", this.user.data.email);
-        
         const docSnap = await getDoc(docRef);
-
         let newUser = docSnap.data();
 
+        // Append the new offer id to their offer list.
         newOffer.join = newUser.creation_date;
         const addedRef = await addDoc(collection(db, "offers"), newOffer);
-
-        newUser.offers.push(addedRef.id);
-        
+        newUser.offers.push(addedRef.id);        
         setDoc(docRef, newUser, { merge: true });
-        
 
-
+        // Throw a toast letting them know they succeded.
         $q.notify({
           color: "green-4",
           textColor: "white",
-          message: "Submitted!",
+          message: "Offer created!",
         });
+
+        // Redirect to offer page.
         this.$router.push("/offer/" + addedRef.id);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     },
+    // To be used when actual files can be uploaded.
     onRejected(rejectedEntries) {
       $q.notify({
         type: "negative",

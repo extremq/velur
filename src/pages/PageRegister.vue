@@ -124,6 +124,7 @@ export default {
   methods: {
     async onSubmit() {
       try {
+        // Firebase auth system.
         const auth = getAuth();
         createUserWithEmailAndPassword(
           auth,
@@ -131,6 +132,8 @@ export default {
           this.register.password
         )
           .then(() => {
+            // If user was succesfully created,
+            // I automatically sign them in.
             signInWithEmailAndPassword(
               auth,
               this.register.email,
@@ -138,29 +141,30 @@ export default {
             ).then(async (userCredential) => {
               const user = userCredential.user;
 
+              // Now, I register their username and
+              // I wait for Firebase to confirm their
+              // username is unique.
               setDoc(doc(db, "usernames", this.register.username), {
                 name: this.register.username,
               })
                 .then(async () => {
-                  try {
-                    let newUser = {
-                      username: this.register.username,
-                      offers: [],
-                      uid: user.uid,
-                      creation_date: Timestamp.now(),
-                    };
-                    await setDoc(
-                      doc(db, "users", this.register.email),
-                      newUser
-                    );
-                  } catch (e) {
-                    console.log(e);
-                  }
+                  // Username is unique!
 
+                  // Create a new user object.
+                  let newUser = {
+                    username: this.register.username,
+                    offers: [],
+                    uid: user.uid,
+                    creation_date: Timestamp.now(),
+                  };
+                  await setDoc(doc(db, "users", this.register.email), newUser);
+
+                  // Redirect to homepage and set the auth store.
                   this.$router.push("/");
                   user.displayName = this.register.username;
                   await this.$store.dispatch("fetchUser", user);
 
+                  // Throw toast to confirm.
                   $q.notify({
                     color: "green-4",
                     textColor: "white",
@@ -168,8 +172,11 @@ export default {
                   });
                 })
                 .catch((error) => {
-                  deleteUser(user)
-                  console.log(error);
+                  // Username is taken.
+                  deleteUser(user);
+
+                  //console.error(error);
+
                   $q.notify({
                     color: "red-4",
                     textColor: "white",
@@ -179,9 +186,12 @@ export default {
             });
           })
           .catch((error) => {
+            // Error creating an account.
             const errorCode = error.code;
             const errorMessage = error.message;
 
+            // Throw toast informing the user
+            // about the error.
             $q.notify({
               color: "red-4",
               textColor: "white",
@@ -189,7 +199,8 @@ export default {
             });
           });
       } catch (err) {
-        console.log(err);
+        // Something went wrong with Firebase.
+        console.error(err);
       }
     },
   },

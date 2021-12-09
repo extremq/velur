@@ -123,24 +123,32 @@ export default {
     };
   },
   methods: {
-    async getOffer() {
+    async getProfile() {
+      // Get the profile based on the parameter.
       const username = this.$route.params.username;
+
+      // Use a query because it supports "where".
       const q = query(
         collection(db, "users"),
         where("username", "==", username)
       );
       const querySnapshot = getDocs(q);
 
+      // Even though I expect only one user,
+      // it retrieves a list.
       (await querySnapshot).forEach((doc) => {
         this.user = doc.data();
         this.found = true;
       });
 
       if (this.found === true) {
+        // If the user exists, translate their
+        // timestamp into a date.
         this.user.creation_date = new Date(
           this.user.creation_date.seconds * 1000
         ).toLocaleString();
 
+        // Request the offers of the author.
         if (this.user.offers.length > 0) {
           const q2 = query(
             collection(db, "offers"),
@@ -154,6 +162,7 @@ export default {
           });
         }
       } else {
+        // There is no user with such name.
         $q.notify({
           color: "red-4",
           textColor: "white",
@@ -165,7 +174,8 @@ export default {
   },
   mounted() {
     $q = useQuasar();
-    this.getOffer();
+    // Init and get the profile.
+    this.getProfile();
   },
 };
 </script>
